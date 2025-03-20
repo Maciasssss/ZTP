@@ -1,0 +1,115 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+
+    <!-- Basic GC Configuration (always enabled) -->
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <RetainVMGarbageCollection>true</RetainVMGarbageCollection>
+
+    <!-- ======================================================= -->
+    <!-- UNCOMMENT ONLY ONE SECTION AT A TIME FOR TESTING        -->
+    <!-- ======================================================= -->
+    
+    <!-- OPTION A: Server GC (uncomment this section to test) -->
+    <!--
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    -->
+    
+    <!-- OPTION A: Workstation GC (uncomment this section to test) -->
+    <!--
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    -->
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!-- ======================================================= -->
+    <!-- UNCOMMENT ONLY ONE SECTION AT A TIME FOR TESTING        -->
+    <!-- ======================================================= -->
+
+    <!-- OPTION B: HeapHardLimit (absolute value - uncomment to test) -->
+    
+    <!-- <RuntimeHostConfigurationOption Include="System.GC.HeapHardLimit" Value="1073741824" /> -->
+   
+    <!-- ^ Set to 2GB to force visible GC activity -->
+    
+    <!-- OPTION B: HeapHardLimitPercent (percentage - uncomment to test) -->
+    
+    <!-- <RuntimeHostConfigurationOption Include="System.GC.HeapHardLimitPercent" Value="10" /> -->
+   
+    <!-- ^ Set to 10% of physical memory to force visible GC activity -->
+    
+    <!-- OPTION C: Per-object-heap hard limits (uncomment to test) -->
+    
+    <!-- <RuntimeHostConfigurationOption Include="System.GC.Server" Value="true" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapCount" Value="4" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimit0" Value="536870912" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimit1" Value="536870912" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimit2" Value="536870912" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimit3" Value="536870912" /> -->
+   
+    <!-- ^ Set to 512MB per heap (4 heaps = 2GB total) to force visible effects -->
+    
+    <!-- OPTION C: Per-object-heap hard limit percents (uncomment to test) -->
+    
+    <!-- <RuntimeHostConfigurationOption Include="System.GC.Server" Value="true" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapCount" Value="4" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimitPercent0" Value="3" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimitPercent1" Value="3" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimitPercent2" Value="3" />
+    <RuntimeHostConfigurationOption Include="System.GC.GCHeapHardLimitPercent3" Value="3" /> -->
+   
+    <!-- ^ Set to 3% per heap to force visible effects -->
+    
+    <!-- OPTION D: HighMemoryPercent (uncomment to test) -->
+    <!--
+    <RuntimeHostConfigurationOption Include="System.GC.HighMemoryPercent" Value="30" />
+    -->
+    <!-- ^ Set to 30% (much lower than default) to make GC more aggressive -->
+    
+    <!-- OPTION E: Large object heap threshold (uncomment to test) -->
+    <!--
+    <RuntimeHostConfigurationOption Include="System.GC.LOHThreshold" Value="16000" />
+    -->
+    <!-- ^ Set to 16KB (much lower than default 85KB) to force many more objects into LOH -->
+    
+    <!-- OPTION F: Conserve memory (uncomment to test) -->
+    <!--
+    <RuntimeHostConfigurationOption Include="System.GC.ConserveMemory" Value="9" />
+    -->
+    <!-- ^ Set to maximum level (9) for most aggressive memory conservation -->
+    
+    <!-- OPTION I: Low Latency Mode (uncomment to test) -->
+    <!--
+    <RuntimeHostConfigurationOption Include="System.GC.LowLatencyMode" Value="true" />
+    <RuntimeHostConfigurationOption Include="System.GC.HeapHardLimit" Value="2147483648" />
+    -->
+    <!-- ^ Combined with low memory limit to create visible tension -->
+    
+    <!-- OPTION I: Sustained Low Latency Mode (uncomment to test) -->
+    <!--
+    <RuntimeHostConfigurationOption Include="System.GC.SustainedLowLatencyMode" Value="true" />
+    <RuntimeHostConfigurationOption Include="System.GC.HeapHardLimit" Value="2147483648" />
+    -->
+    <!-- ^ Combined with low memory limit to create visible tension -->
+    
+    <!-- OPTION H: LOH Compaction Mode (for use with code-based GC.Collect) -->
+    <!--
+    <RuntimeHostConfigurationOption Include="System.GC.LargeObjectHeapCompactionMode" Value="CompactOnce" />
+    <RuntimeHostConfigurationOption Include="System.GC.LOHThreshold" Value="16000" />
+    -->
+    <!-- ^ Combined with low LOH threshold to amplify fragmentation effects -->
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.3" />
+  </ItemGroup>
+
+</Project>
