@@ -5,10 +5,6 @@
 
 > A comprehensive testing framework for evaluating the impact of different .NET Garbage Collector configurations on memory-intensive operations
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/microsoft/dotnet/main/dotnet-logo.png" width="200" alt=".NET Core Logo"/>
-</p>
-
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
@@ -64,7 +60,7 @@ This project provides tools to analyze how different .NET Garbage Collector conf
 
 2. Run the PowerShell script:
    ```powershell
-   .\optimized-gc-testing.ps1
+   .\dotmemory-test-scriptg.ps1
    ```
 
 3. For each test configuration:
