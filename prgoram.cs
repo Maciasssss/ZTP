@@ -26,7 +26,7 @@ class Program
         ConsoleKeyInfo keyInfo;
         do
         {
-            keyInfo = Console.ReadKey(true); // true means don't display the key
+            keyInfo = Console.ReadKey(true); 
         } while (keyInfo.Key != ConsoleKey.Escape);
         // Display test information
         string testName = "Standard Test with Current GC Settings";
