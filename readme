@@ -1,0 +1,8 @@
+Method 2: Profiling Your Batch Files
+
+In dotMemory, click "Profile Local App"
+Click "Browse" and select cmd.exe as the application to profile
+In "Command line arguments" enter: /c "path\to\your\batch-file.bat"
+Click "Run" to start the profiling session with the batch file
+When the batch file runs your application with the environment variables, dotMemory will profile it
+Take snapshots at key points to analyze memory behavior
