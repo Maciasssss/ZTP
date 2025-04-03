@@ -1,4 +1,4 @@
-# PowerShell script for testing GC variables in the same console window
+
 param (
     [string]$AppPath = "C:\Users\darth\Desktop\Ztp1\Ztp\bin\Release\net9.0\Ztp.dll"
 )
@@ -6,11 +6,13 @@ param (
 function Test-GCConfiguration {
     param (
         [string]$TestName,
-        [hashtable]$EnvironmentVars
+        [hashtable]$EnvironmentVars,
+        [string]$Description
     )
     
     Write-Host "`n===============================================" -ForegroundColor Blue
     Write-Host "Test: $TestName" -ForegroundColor Green
+    Write-Host "Description: $Description" -ForegroundColor Yellow
     Write-Host "Environment variables:" -ForegroundColor Cyan
     
     # Display the environment variables
@@ -29,15 +31,11 @@ function Test-GCConfiguration {
     Write-Host "2. Press Enter to start the test..." -ForegroundColor Yellow
     Read-Host
     
-    # Create a signal file to indicate dotMemory should take before snapshot
-    $beforeSnapshotSignal = Join-Path $env:TEMP "gc_test_before_$([Guid]::NewGuid().ToString()).signal"
-    New-Item -Path $beforeSnapshotSignal -ItemType File -Force | Out-Null
-    
     # Run the application with the current environment variables
     Write-Host "`nRunning application with $TestName settings..." -ForegroundColor White
     Write-Host "dotMemory will show process ID after application starts" -ForegroundColor White
     
-    # IMPORTANT: Run in same window and capture the output
+    # Run in same window and capture the output
     & dotnet $AppPath
     
     # Application has completed - remind user to take final snapshot
@@ -51,70 +49,71 @@ function Test-GCConfiguration {
         [Environment]::SetEnvironmentVariable($key, $null, "Process")
     }
     
-    # Clean up signal file
-    if (Test-Path $beforeSnapshotSignal) {
-        Remove-Item $beforeSnapshotSignal -Force
-    }
-    
     Write-Host "Test '$TestName' completed." -ForegroundColor Green
     Write-Host "-----------------------------------------------"
 }
 
-# Show instructions for the user
-Write-Host "=== .NET GC Testing with dotMemory (Same Window) ===" -ForegroundColor Magenta
-Write-Host "This script will guide you through testing different GC configurations." -ForegroundColor Magenta
-Write-Host "BEFORE CONTINUING:" -ForegroundColor Yellow
-Write-Host "1. Start dotMemory" -ForegroundColor Yellow
-Write-Host "2. For each test, the script will:" -ForegroundColor Yellow
-Write-Host "   - Set up the correct environment variables" -ForegroundColor Yellow
-Write-Host "   - Run the application directly in this window" -ForegroundColor Yellow
-Write-Host "   - Let you take snapshots in dotMemory before and after" -ForegroundColor Yellow
+Write-Host "=== Optimized GC Testing for Matrix Operations ===" -ForegroundColor Magenta
+Write-Host "This script uses GC settings that will show clear differences when multiplying large matrices." -ForegroundColor Magenta
 Write-Host "`nPress Enter when dotMemory is open and ready..." -ForegroundColor Yellow
 Read-Host
 
-# Run tests with different GC configurations
-Test-GCConfiguration -TestName "Baseline (Default Settings)" -EnvironmentVars @{}
+# Baseline test with default settings
+Test-GCConfiguration -TestName "Baseline (Default Settings)" -EnvironmentVars @{} -Description "Default settings - baseline for comparison"
 
-Test-GCConfiguration -TestName "Workstation GC" -EnvironmentVars @{
-    "DOTNET_GCServer" = "0"
-}
-
+# Server GC - will use multiple heaps and GC threads
 Test-GCConfiguration -TestName "Server GC" -EnvironmentVars @{
     "DOTNET_GCServer" = "1"
-}
+} -Description "Uses multiple GC heaps and dedicated threads - better for large matrices"
 
-Test-GCConfiguration -TestName "Heap Hard Limit (50%)" -EnvironmentVars @{
-    "DOTNET_GCHeapHardLimitPercent" = "50"
-}
+# Workstation GC - single background GC thread
+Test-GCConfiguration -TestName "Workstation GC" -EnvironmentVars @{
+    "DOTNET_GCServer" = "0"
+} -Description "Single GC heap and thread - will be noticeably slower for large matrices"
 
-Test-GCConfiguration -TestName "RetainVM Enabled" -EnvironmentVars @{
-    "DOTNET_GCRetainVM" = "1"
-}
+# Aggressive memory limit - will cause more frequent collections
+Test-GCConfiguration -TestName "Low Memory Limit (25%)" -EnvironmentVars @{
+    "DOTNET_GCHeapHardLimitPercent" = "25"
+} -Description "Restricts memory usage to 25% of physical memory - forces more frequent GCs"
 
-Test-GCConfiguration -TestName "High Memory Percent (95%)" -EnvironmentVars @{
-    "DOTNET_GCHighMemPercent" = "95"
-}
+# Very restrictive LOH threshold - more objects on LOH
+Test-GCConfiguration -TestName "Low LOH Threshold (32KB)" -EnvironmentVars @{
+    "DOTNET_GCLOHThreshold" = "32768"
+} -Description "Lowers threshold for Large Object Heap to 32KB (default is 85KB)"
 
-Test-GCConfiguration -TestName "Large Object Heap Threshold (200KB)" -EnvironmentVars @{
-    "DOTNET_GCLOHThreshold" = "1048888"
-}
+# High LOH threshold - fewer objects on LOH
+Test-GCConfiguration -TestName "High LOH Threshold (500KB)" -EnvironmentVars @{
+    "DOTNET_GCLOHThreshold" = "512000"
+} -Description "Raises threshold for Large Object Heap to 500KB"
 
-Test-GCConfiguration -TestName "Conserve Memory (Level 7)" -EnvironmentVars @{
-    "DOTNET_GCConserveMemory" = "5"
-}
+# High memory conservation - GC more aggressively
+Test-GCConfiguration -TestName "Aggressive Memory Conservation" -EnvironmentVars @{
+    "DOTNET_GCConserveMemory" = "9"
+} -Description "Most aggressive memory conservation (9 on scale of 0-9)"
 
-Test-GCConfiguration -TestName "LOH Compaction" -EnvironmentVars @{
-    "DOTNET_GCLargeObjectHeapCompactionMode" = "CompactOnce" 
-}
-
-Test-GCConfiguration -TestName "Sustained Low Latency" -EnvironmentVars @{
-    "DOTNET_GCSustainedLowLatency" = "1"
-}
-
-Test-GCConfiguration -TestName "Server GC with LOH Compaction" -EnvironmentVars @{
-    "DOTNET_GCServer" = "1"
+# Conserve memory with LOH compaction
+Test-GCConfiguration -TestName "Memory Conservation + LOH Compaction" -EnvironmentVars @{
+    "DOTNET_GCConserveMemory" = "7"
     "DOTNET_GCLargeObjectHeapCompactionMode" = "CompactOnce"
-}
+} -Description "Combines memory conservation with LOH compaction"
+
+# No Concurrent GC - will cause longer pauses
+Test-GCConfiguration -TestName "Non-Concurrent GC" -EnvironmentVars @{
+    "DOTNET_GCConcurrent" = "0"
+} -Description "Disables concurrent GC - will cause longer GC pauses but potentially better throughput"
+
+# Background GC and Server GC - optimal for server workloads
+Test-GCConfiguration -TestName "Server + Background GC" -EnvironmentVars @{
+    "DOTNET_GCServer" = "1"
+    "DOTNET_GCConcurrent" = "1"
+} -Description "Server GC with background collections - typically best for high-throughput scenarios"
+
+# No CPU groups - useful if you have many CPUs
+Test-GCConfiguration -TestName "Server GC + No CPU Groups" -EnvironmentVars @{
+    "DOTNET_GCServer" = "1"
+    "DOTNET_GCCpuGroup" = "0"
+    "DOTNET_GCHeapCount" = "8" 
+} -Description "Server GC with explicit heap count, ignoring CPU groups"
 
 Write-Host "`nAll tests completed!" -ForegroundColor Green
 Write-Host "You can now analyze all snapshots in dotMemory." -ForegroundColor Green

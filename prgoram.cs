@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 class Program
 {
     // Constants for matrix size
-    const int LARGE_ROWS = 10000;
-    const int LARGE_COLS = 10000;
+    const int LARGE_ROWS = 15000;
+    const int LARGE_COLS = 15000;
     const int SMALL_ROWS = 5;
     const int SMALL_COLS = 5;
 
